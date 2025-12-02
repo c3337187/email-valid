@@ -1,0 +1,58 @@
+# Email list validator
+
+`email_filter.py` проверяет список адресов и делит его на валидные/невалидные.
+
+## Возможности
+- чтение CSV (с автоопределением разделителя) и TXT;
+- игнорирование строк-комментариев (`#` в начале) и удаление дублей с сохранением порядка;
+- проверка синтаксиса, временных доменов и списка разрешённых доменов;
+- опциональная SMTP‑проверка существования ящика;
+- вывод в три файла: общий лог с `[INFO]/[ERROR]`, список валидных адресов и список невалидных с причинами.
+
+## Быстрый запуск готового EXE
+После сборки (см. ниже) в папке `complite` лежит комплект:
+
+1. Откройте `complite/emails_input.txt` и вставьте адреса по одному в строке.
+2. Запустите `complite/email_filter.exe` (двойной клик или через консоль). Ничего указывать не нужно — файлы создаются рядом с EXE.
+3. По завершении появятся файлы:
+   - `validation.log` — все сообщения с префиксами `[INFO]`/`[ERROR]`;
+   - `valid_emails.txt` — только валидные адреса;
+   - `invalid_emails.txt` — невалидные адреса с причинами.
+4. В конце выполнения программа попросит нажать Enter, чтобы закрыть окно.
+
+## CLI-режим (Python)
+```bash
+python email_filter.py \
+  --input all-list.csv \
+  --valid-output valid_emails.txt \
+  --invalid-output invalid_emails.txt \
+  --log-file validation.log \
+  --log-level INFO \
+  --smtp-check --smtp-timeout 5
+```
+
+Полезные опции:
+- `--input` — путь к файлу (CSV или TXT, по умолчанию `emails_input.txt` рядом со скриптом/EXE).
+- `--allowed-domains` / `--temp-domains` — переопределить списки доменов (по одному в строке).
+- `--smtp-check` — включить SMTP‑проверку (медленнее, требует сети).
+- `--no-pause` — не ждать Enter после завершения (удобно для автоматизации).
+
+## Сборка EXE и подготовка папки `complite`
+Скрипт `build_exe.py` сам установит зависимости, проверит их, соберёт EXE и подготовит комплект.
+
+```bash
+# из корня репозитория
+python build_exe.py --entry email_filter.py --name email_filter
+```
+
+Что произойдёт:
+- `pip install -r requirements.txt` и `pip check`;
+- установка PyInstaller (если ещё нет);
+- сборка однопроходного EXE в `dist/<name>.exe`;
+- создание папки `complite/` с EXE, `emails_input.txt`, README-инструкцией и копиями `all-list.txt/all-list.csv` (если есть).
+
+Опции сборщика:
+- `--entry` — какой `.py` упаковать (по умолчанию `email_filter.py`);
+- `--name` — имя EXE (по умолчанию `email_filter`);
+- `--requirements` — альтернативный `requirements.txt`;
+- `--skip-install` — пропустить установку зависимостей и PyInstaller.
